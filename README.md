@@ -123,3 +123,15 @@ http://localhost:8000/index.php
 - Transactions MySQL pour l'enregistrement des commandes
 - `session_destroy()` complet à la déconnexion
 
+voici une demonstration du projet :
+
+
+
+https://github.com/user-attachments/assets/69353ec7-e605-487e-b5ce-c2e1507fffad
+
+
+
+
+
+
+
