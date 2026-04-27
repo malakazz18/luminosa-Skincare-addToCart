@@ -1,17 +1,31 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'skincare_shop');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => false,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+require_once __DIR__ . '/securite.php';
+
+
+define('DB_HOST',    'localhost');
+define('DB_NAME',    'skincare_shop');
+define('DB_USER',    'root');
+define('DB_PASS',    '');
 define('DB_CHARSET', 'utf8mb4');
 
 
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+        $dsn     = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -21,8 +35,8 @@ function getDB(): PDO {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
             die('<div style="font-family:monospace;color:red;padding:20px;">
-                    <strong>Database connection failed:</strong><br>' . htmlspecialchars($e->getMessage()) .
-                 '</div>');
+                    <strong>Connexion base de données échouée :</strong><br>'
+                . htmlspecialchars($e->getMessage()) . '</div>');
         }
     }
     return $pdo;

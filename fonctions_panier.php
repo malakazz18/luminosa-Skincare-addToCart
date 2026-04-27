@@ -1,5 +1,6 @@
 <?php
 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -76,7 +77,6 @@ function cartGetTotal(PDO $pdo): float {
     }
     return $total;
 }
-
 
 function cartGetCount(): int {
     cartInit();

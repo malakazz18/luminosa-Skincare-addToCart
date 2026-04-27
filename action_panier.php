@@ -5,29 +5,37 @@ require_once 'fonctions_panier.php';
 
 header('Content-Type: application/json');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Méthode non autorisée.']);
+    exit;
+}
+
+verifierCsrf();
+
 $pdo    = getDB();
 $action = $_POST['action'] ?? '';
 
 switch ($action) {
 
     case 'add':
-        $id  = (int)($_POST['product_id'] ?? 0);
-        $qty = (int)($_POST['quantity']   ?? 1);
-        if ($id > 0 && $qty > 0) {
+        $id  = nettoyerEntier($_POST['product_id'] ?? 0) ?? 0;
+        $qty = nettoyerEntier($_POST['quantity']   ?? 1) ?? 1;
+        if ($id > 0 && $qty > 0 && $qty <= 99) {
             cartAdd($id, $qty);
         }
         break;
 
     case 'update':
-        $id  = (int)($_POST['product_id'] ?? 0);
-        $qty = (int)($_POST['quantity']   ?? 0);
+        $id  = nettoyerEntier($_POST['product_id'] ?? 0) ?? 0;
+        $qty = nettoyerEntier($_POST['quantity']   ?? 0) ?? 0;
         if ($id > 0) {
             cartUpdate($id, $qty);
         }
         break;
 
     case 'remove':
-        $id = (int)($_POST['product_id'] ?? 0);
+        $id = nettoyerEntier($_POST['product_id'] ?? 0) ?? 0;
         if ($id > 0) {
             cartRemove($id);
         }
@@ -38,10 +46,9 @@ switch ($action) {
         break;
 
     default:
-        echo json_encode(['error' => 'Unknown action']);
+        echo json_encode(['error' => 'Action inconnue.']);
         exit;
 }
-
 
 $items = cartGetItems($pdo);
 $rows  = [];

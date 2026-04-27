@@ -1,30 +1,24 @@
 <?php
 
+
 require_once 'config.php';
 require_once 'fonctions_panier.php';
-
-$pdo = getDB();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit;
 }
 
-$name  = trim($_POST['customer_name']  ?? '');
-$email = trim($_POST['customer_email'] ?? '');
+verifierCsrf();
+exigerConnexion();
 
-// Basic validation
-$errors = [];
-if ($name === '')                    { $errors[] = 'Votre nom est requis.'; }
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Une adresse e-mail valide est requise.'; }
+$pdo  = getDB();
+$user = $_SESSION['user'];
 
 $items = cartGetItems($pdo);
-if (empty($items))                   { $errors[] = 'Votre panier est vide.'; }
-
-if (!empty($errors)) {
-
-    $_SESSION['order_errors'] = $errors;
-    header('Location: index.php#cart-sidebar');
+if (empty($items)) {
+    $_SESSION['order_errors'] = ['Votre panier est vide.'];
+    header('Location: index.php');
     exit;
 }
 
@@ -33,14 +27,21 @@ $total = cartGetTotal($pdo);
 try {
     $pdo->beginTransaction();
 
-   
     $stmt = $pdo->prepare(
-        'INSERT INTO orders (customer_name, customer_email, total_price) VALUES (?, ?, ?)'
+        'INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, shipping_address, total_price)
+         VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$name, $email, $total]);
+    $fullName = $user['first_name'] . ' ' . $user['last_name'];
+    $stmt->execute([
+        $user['id'],
+        $fullName,
+        $user['email'],
+        $user['phone'],
+        $user['address'],
+        $total,
+    ]);
     $orderId = (int)$pdo->lastInsertId();
 
-  
     $stmt2 = $pdo->prepare(
         'INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)'
     );
@@ -51,7 +52,6 @@ try {
             $item['quantity'],
             $item['product']['price'],
         ]);
-      
         $pdo->prepare('UPDATE products SET stock = stock - ? WHERE id = ?')
             ->execute([$item['quantity'], $item['product']['id']]);
     }
@@ -60,16 +60,16 @@ try {
     cartClear();
 
     $_SESSION['order_success'] = [
-        'order_id' => $orderId,
-        'name'     => $name,
-        'total'    => $total,
+        'name'    => $user['first_name'],
+        'total'   => $total,
+        'address' => $user['address'],
     ];
     header('Location: confirmation.php');
     exit;
 
 } catch (Exception $e) {
     $pdo->rollBack();
-    $_SESSION['order_errors'] = ['Une erreur est survenue lors de la commande. Veuillez réessayer.'];
+    $_SESSION['order_errors'] = ["Une erreur est survenue lors de la commande. Veuillez réessayer."];
     header('Location: index.php');
     exit;
 }

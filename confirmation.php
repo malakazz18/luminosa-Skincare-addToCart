@@ -32,7 +32,8 @@ unset($_SESSION['order_success']);
         <h1>Merci, <?= htmlspecialchars($success['name']) ?> !</h1>
         <p>Votre commande a bien été confirmée.</p>
         <p class="confirm-total">Total payé : <strong><?= number_format($success['total'], 2) ?> TND</strong></p>
-        <p class="confirm-note">Nous vous enverrons des mises à jour par e-mail. Votre peau va vous remercier✨</p>
+        <p class="confirm-address"><i class="ri-map-pin-line"></i> Livraison à : <?= htmlspecialchars($success['address']) ?></p>
+        <p class="confirm-note">Nous vous enverrons des mises à jour par e-mail. Votre peau va vous remercier. ✨</p>
         <a href="index.php" class="btn-checkout" style="display:inline-flex;gap:8px;text-decoration:none;margin-top:10px;">
             <i class="ri-arrow-left-line"></i> Continuer mes achats
         </a>
