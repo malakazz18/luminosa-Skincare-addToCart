@@ -18,8 +18,7 @@ luminosa/
 ├── confirmation.php        ← Page de confirmation post-commande
 ├── style.css               ← Feuille de style complète (palette pastel)
 ├── shop.js                 ← JavaScript (panier AJAX + modale auth)
-├── database.sql            ← Schéma + données de test produits
-└── auth_migration.sql      ← Migration : table users + colonnes orders
+
 ```
 
 ---
